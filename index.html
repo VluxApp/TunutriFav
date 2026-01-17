@@ -90,9 +90,9 @@
         .context-label { color: var(--neon); margin-top: 15px; display: block; font-size: 0.75rem; letter-spacing: 1px; }
         .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; margin-bottom: 15px; }
         
-        .btn-flavor { background: #222; color: #888; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 45px; }
-        .btn-flavor:hover { border-color: #555; }
-        .btn-flavor.selected { background: var(--neon) !important; color: black !important; border-color: var(--neon) !important; box-shadow: 0 0 10px rgba(204,255,0,0.4); transform: scale(1.02); }
+        .btn-flavor { background: #222; color: #888; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 45px; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .btn-flavor:active { transform: scale(0.95); }
+        .btn-flavor.selected { background: var(--neon) !important; color: black !important; border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(204,255,0,0.4); }
 
         .day-header { background: #1a1a1a; padding: 12px; border-radius: 10px 10px 0 0; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .day-tracker { padding: 8px; background: #111; border-bottom: 1px solid #222; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; font-size: 0.65rem; }
@@ -224,17 +224,17 @@
                 
                 <label class="context-label">2. ELIGE EL MOMENTO</label>
                 <div class="context-grid">
-                    <button class="btn-flavor" id="ctxBreakfast" onclick="app.setContext('Desayuno')">☕<br>Desayuno</button>
-                    <button class="btn-flavor" id="ctxSnack" onclick="app.setContext('Snack')">🥪<br>Media/Snack</button>
-                    <button class="btn-flavor" id="ctxMain" onclick="app.setContext('Comida/Cena')">🍽️<br>Comida/Cena</button>
+                    <button class="btn-flavor" id="ctxBreakfast" onclick="window.app.setContext('Desayuno')">☕<br>Desayuno</button>
+                    <button class="btn-flavor" id="ctxSnack" onclick="window.app.setContext('Snack')">🥪<br>Media/Snack</button>
+                    <button class="btn-flavor" id="ctxMain" onclick="window.app.setContext('Comida/Cena')">🍽️<br>Comida/Cena</button>
                 </div>
 
                 <label>3. PREFERENCIA</label>
                 <div class="flavor-grid">
-                    <button class="btn-flavor" id="btnSalty" onclick="app.setFlavor('Salado')">🧂 SALADO</button>
-                    <button class="btn-flavor" id="btnSweet" onclick="app.setFlavor('Dulce')">🍰 DULCE</button>
+                    <button class="btn-flavor" id="btnSalty" onclick="window.app.setFlavor('Salado')">🧂 SALADO</button>
+                    <button class="btn-flavor" id="btnSweet" onclick="window.app.setFlavor('Dulce')">🍰 DULCE</button>
                 </div>
-                <button class="btn btn-primary" onclick="app.runSwap()">ANALIZAR Y GENERAR (GROQ⚡)</button>
+                <button class="btn btn-primary" onclick="window.app.runSwap()">ANALIZAR Y GENERAR (GROQ⚡)</button>
             </div>
             <div id="swapResults"></div>
         </div>
@@ -248,8 +248,8 @@
             <h1>MI <span class="neon">EVO</span></h1>
             <div class="card">
                 <div class="chart-controls">
-                    <button class="chart-btn active" id="btnChartWeight" onclick="app.switchChart('weight')">PESO</button>
-                    <button class="chart-btn" id="btnChartBody" onclick="app.switchChart('body')">MEDIDAS</button>
+                    <button class="chart-btn active" id="btnChartWeight" onclick="window.app.switchChart('weight')">PESO</button>
+                    <button class="chart-btn" id="btnChartBody" onclick="window.app.switchChart('body')">MEDIDAS</button>
                 </div>
                 <canvas id="weightChart"></canvas>
             </div>
@@ -269,16 +269,16 @@
                     <div class="target-box"><input type="number" id="evoArm" class="target-val-input" placeholder="-"><span class="target-label">Brazo</span></div>
                 </div>
 
-                <button class="btn btn-primary" onclick="app.addEvo()">REGISTRAR TODO</button>
+                <button class="btn btn-primary" onclick="window.app.addEvo()">REGISTRAR TODO</button>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav hidden" id="mainNav">
-        <button class="nav-item active" onclick="app.nav('tab-perfil', this)">👤<span>Perfil</span></button>
-        <button class="nav-item" onclick="app.nav('tab-swap', this)">⚡<span>Swap</span></button>
-        <button class="nav-item" onclick="app.nav('tab-menu', this)">📅<span>Menú</span></button>
-        <button class="nav-item" onclick="app.nav('tab-evo', this)">📈<span>Evo</span></button>
+        <button class="nav-item active" onclick="window.app.nav('tab-perfil', this)">👤<span>Perfil</span></button>
+        <button class="nav-item" onclick="window.app.nav('tab-swap', this)">⚡<span>Swap</span></button>
+        <button class="nav-item" onclick="window.app.nav('tab-menu', this)">📅<span>Menú</span></button>
+        <button class="nav-item" onclick="window.app.nav('tab-evo', this)">📈<span>Evo</span></button>
     </nav>
 
 </div>
@@ -292,8 +292,8 @@
         <label>Momento</label>
         <select id="modalMeal"><option>Desayuno</option><option>Media Mañana</option><option>Comida</option><option>Merienda</option><option>Cena</option></select>
         <div class="grid-2" style="margin-top:20px;">
-            <button class="btn btn-outline" style="margin-top:0;" onclick="app.closeModal()">CANCELAR</button>
-            <button class="btn btn-primary" style="margin-top:0;" onclick="app.confirmAddToMenu()">GUARDAR</button>
+            <button class="btn btn-outline" style="margin-top:0;" onclick="window.app.closeModal()">CANCELAR</button>
+            <button class="btn btn-primary" style="margin-top:0;" onclick="window.app.confirmAddToMenu()">GUARDAR</button>
         </div>
     </div>
 </div>
@@ -319,7 +319,8 @@
         dbService = firebase.firestore();
     } catch(e) { console.error(e); }
 
-    const app = {
+    // --- APP CORE (GLOBAL) ---
+    window.app = {
         user: null,
         data: {
             profile: { name:"", age:"", weight:"", height:"", sex:"Hombre", goal:"Mantenimiento", sport:"Crossfit", activity:"1.55", targets:{kcal:2000, p:150, c:200, f:60} },
@@ -570,13 +571,86 @@
                         <div style="margin:5px 0; color:#ddd; font-size:0.9rem;">${opt.ingred}</div>
                         <details><summary>👨‍🍳 VER RECETA</summary><div class="recipe-text">${opt.recipe}</div></details>
                         <div class="meal-macros" style="margin-top:10px;">🔥${opt.kcal} | P:${opt.p} C:${opt.c} G:${opt.f}</div>
-                        <button class="btn btn-outline" style="padding:8px; font-size:0.8rem; margin-top:10px;" onclick="app.openModal(${i})">📅 AÑADIR</button>
+                        <button class="btn btn-outline" style="padding:8px; font-size:0.8rem; margin-top:10px;" onclick="window.app.openModal(${i})">📅 AÑADIR</button>
                     </div>`;
                 });
             } catch(e) { 
                 console.error(e);
                 resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}</p>`; 
             }
+        },
+
+        setFlavor: function(f) {
+            this.flavor = f;
+            document.getElementById('btnSalty').classList.toggle('selected', f==='Salado');
+            document.getElementById('btnSweet').classList.toggle('selected', f==='Dulce');
+        },
+
+        setContext: function(c) {
+            this.mealContext = c;
+            document.getElementById('ctxBreakfast').classList.toggle('selected', c==='Desayuno');
+            document.getElementById('ctxMain').classList.toggle('selected', c==='Comida/Cena');
+            document.getElementById('ctxSnack').classList.toggle('selected', c==='Snack');
+        },
+
+        // --- EVO & CHARTS ---
+        switchChart: function(mode) {
+            this.chartMode = mode;
+            document.getElementById('btnChartWeight').classList.toggle('active', mode==='weight');
+            document.getElementById('btnChartBody').classList.toggle('active', mode==='body');
+            this.renderChart();
+        },
+
+        addEvo: function() {
+            const d = document.getElementById('evoDate').value;
+            const w = document.getElementById('evoWeight').value;
+            const chest = document.getElementById('evoChest').value || 0;
+            const waist = document.getElementById('evoWaist').value || 0;
+            const hip = document.getElementById('evoHip').value || 0;
+            const thigh = document.getElementById('evoThigh').value || 0;
+            const arm = document.getElementById('evoArm').value || 0;
+
+            if(d && w) { 
+                this.data.evolution.push({ date:d, weight:w, chest, waist, hip, thigh, arm }); 
+                this.data.evolution.sort((a,b)=>new Date(a.date)-new Date(b.date)); 
+                this.saveData(); 
+                this.renderChart();
+                alert("✅ Registro guardado");
+            } else {
+                alert("Fecha y peso son obligatorios");
+            }
+        },
+
+        renderChart: function() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if(window.chart) window.chart.destroy();
+            const labels = this.data.evolution.map(e=>e.date);
+            let datasets = [];
+
+            if(this.chartMode === 'weight') {
+                datasets.push({
+                    label: 'Peso (Kg)',
+                    data: this.data.evolution.map(e=>e.weight),
+                    borderColor: '#CCFF00', backgroundColor: 'rgba(204,255,0,0.1)', fill: true, tension: 0.3
+                });
+            } else {
+                datasets = [
+                    { label:'Pecho', data:this.data.evolution.map(e=>e.chest), borderColor:'#FF4444', borderDash:[5,5], tension:0.3 },
+                    { label:'Cintura', data:this.data.evolution.map(e=>e.waist), borderColor:'#4444FF', tension:0.3 },
+                    { label:'Cadera', data:this.data.evolution.map(e=>e.hip), borderColor:'#FFFF44', tension:0.3 },
+                    { label:'Muslo', data:this.data.evolution.map(e=>e.thigh), borderColor:'#00CCFF', tension:0.3 },
+                    { label:'Brazo', data:this.data.evolution.map(e=>e.arm), borderColor:'#FF00FF', tension:0.3 }
+                ];
+            }
+
+            window.chart = new Chart(ctx, { 
+                type:'line', 
+                data: { labels, datasets }, 
+                options: { 
+                    plugins:{ legend:{ display: (this.chartMode==='body'), labels:{color:'#888', boxWidth:10} } }, 
+                    scales:{ x:{ display:false }, y:{ grid:{ color:'#333' }, ticks:{ color:'#666' } } } 
+                } 
+            });
         },
 
         delMeal: function(d, i) { if(confirm("¿Borrar?")) { this.data.menu[d].splice(i, 1); this.saveData(); this.renderMenu(); } },
