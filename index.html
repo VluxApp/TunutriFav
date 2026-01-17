@@ -465,7 +465,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V59 (TOTAL RAW + BRAND DETECTIVE) ---
+        // --- SWAP V61 (EQUIVALENCIA ISO-MACRO FORZADA) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -474,9 +474,8 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando (BEDCA + Marcas)...<br>2. Diseñando 5 opciones...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando Base (BEDCA/Marcas)...<br>2. Aplicando ALGORITMO ISO-MACRO...<br>3. Ajustando gramos...</div>`;
 
-            // Lógica DULCE vs SALADO estricta
             let promptContext = "";
             if (this.flavor === "Dulce") {
                 promptContext = `MODO: DULCE (Sweet). INGREDIENTES PERMITIDOS: Avena, Fruta, Yogur, Whey, Claras, Cacao, Pan con mermelada. PROHIBIDO: Carne, Pescado, Legumbres, Verduras saladas.`;
@@ -486,31 +485,32 @@
 
             let levelLabel = (activityVal >= 1.725) ? "ÉLITE/PRO" : "AMATEUR";
 
-            // PROMPT V59 (RAW + BRAND DETECTIVE)
+            // PROMPT MAESTRO V61 (ISO-MACRO)
             const prompt = `
-            ROL: NUTRICIONISTA EXPERTO Y AUDITOR (BEDCA + BASE COMERCIAL).
+            ROL: ALGORITMO NUTRICIONAL DE ALTA PRECISIÓN.
             
-            1. REGLA SUPREMA DE MEDICIÓN ("EN CRUDO"):
-               - Arroz, Pasta, Legumbres, Avena: SIEMPRE peso en SECO/CRUDO.
-               - Carne, Pescado, Pollo: SIEMPRE peso en CRUDO (antes de cocinar).
-               - Ejemplo: 100g Pollo = ~23g Proteína (valor crudo), no 30g.
+            1. REGLA SUPREMA: PESOS EN CRUDO Y EQUIVALENCIAS REALES.
+               - Si el usuario dice "60g Pan" (~30g HC) y tú ofreces "Patata", DEBES calcular cuánta patata equivale a 30g HC.
+               - Patata cruda = ~17% HC. -> 30 / 0.17 = 176g Patata.
+               - JAMÁS ofrezcas "50g Patata" para sustituir "60g Pan". Eso es un error grave de cálculo.
+               - Arroz/Pasta: Usa ~70-75% HC (crudo).
+               - Pan: Usa ~50% HC.
+               - Patata: Usa ~17% HC.
             
             2. DETECTIVE DE MARCAS:
-               - Si el usuario escribe una marca específica (ej: "Hacendado", "Danone", "Mercadona", "Carrefour"), IGNORA la base genérica y usa tu conocimiento comercial de ese producto.
-               - Ejemplo: "Yogur Griego Ligero Hacendado" = 60kcal, 2g grasa, 10g proteína (aprox). ÚSALO.
-               - Si no hay marca, usa BEDCA (España).
+               - Si hay marca (Hacendado, Danone...), usa sus macros comerciales.
+               - Si no, usa BEDCA (España).
             
             TAREA 1: ANÁLISIS DE LA BASE
-            - Analiza: "${base}".
-            - Calcula Kcal, Proteína, Carbos y Grasa totales aplicando las reglas anteriores.
+            - Calcula Kcal y Macros de "${base}".
             
             TAREA 2: GENERAR 5 OPCIONES (OBLIGATORIO)
             - REQUISITO: Genera EXACTAMENTE 5 opciones distintas.
             - CONTEXTO: ${this.mealContext.toUpperCase()} + ${promptContext}.
-            - REGLA DE ORO: Las 5 opciones deben tener las mismas Kcal (+/- 10%) que la base. Ajusta los gramos.
+            - REGLA DE ORO: Las opciones deben ser ISO-MACROS. Ajusta la cantidad (gramos) del ingrediente principal para que coincidan los Carbohidratos y Proteínas con la base.
             
             TAREA 3: UI LIMPIA
-            - En el resumen, dame solo el total de macros.
+            - Resumen simple.
 
             FORMATO JSON OBLIGATORIO:
             {
@@ -526,7 +526,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.25, 
+                        temperature: 0.1, // Lógica pura para forzar la equivalencia matemática
                         response_format: { type: "json_object" }
                     })
                 });
@@ -547,13 +547,13 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS AUDITOR (BEDCA/MARCAS 🇪🇸)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS ISO-MACRO (BEDCA/MARCAS)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EXACTAS ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EQUIVALENTES (PESO CRUDO) ⬇️</div>
                     `;
                 }
 
