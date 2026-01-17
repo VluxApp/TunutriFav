@@ -465,7 +465,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V53 (CALCULADORA ESTRICTA + AUDITOR) ---
+        // --- SWAP V54 (INGENIERÍA INVERSA & PRECISIÓN MATEMÁTICA) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -474,7 +474,7 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Pesando ingredientes...<br>2. Calculando opciones para ${this.mealContext}...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Calculando macros reales...<br>2. Aplicando ingeniería inversa...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
@@ -483,39 +483,34 @@
                 promptContext = `MODO: SALADO. TIPO: Plato principal. INGREDIENTES: Carnes, Pescados, Arroz, Patata, Huevos, Legumbres.`;
             }
 
-            // DETECTOR DE NIVEL
             let levelLabel = (activityVal >= 1.725) ? "ÉLITE/PRO" : "AMATEUR";
 
-            // --- INYECCIÓN DE CONOCIMIENTO ---
-            let sportKnowledge = "";
-            if (sport === 'Hyrox') sportKnowledge = `PROTOCOLO HYROX: Competición >60min. Carga CHO: 6-8g/kg.`;
-            else if (sport === 'Futbol') sportKnowledge = `PROTOCOLO FÚTBOL: Recuperación 3R. Glucógeno intermitente.`;
-            else if (sport === 'Culturismo') sportKnowledge = `PROTOCOLO CULTURISMO: Proteína Alta (2g/kg). Saciedad.`;
-            else if (sport === 'Crossfit') sportKnowledge = `PROTOCOLO CROSSFIT: Alta intensidad. Carb intra-entreno.`;
-            else if (sport === 'Ciclismo') sportKnowledge = `PROTOCOLO CICLISMO: Fondo. Ratio 4:1. Sodio.`;
-            else sportKnowledge = "Estrategia General.";
-
-            // PROMPT AUDITOR ESTRICTO V53
+            // PROMPT MATEMÁTICO V54
             const prompt = `
-            ACTÚA COMO UNA CALCULADORA NUTRICIONAL ESTRICTA Y CIENTÍFICA (NO COMO CHEF).
-            
-            PASO 1: ANÁLISIS MATEMÁTICO PURO
-            - Analiza: "${base}".
-            - REGLA DE ORO: Si el usuario especifica GRAMOS, ÚSALOS RIGUROSAMENTE. No redondees a "raciones". 
-            - Ejemplo: Si dice "60g pan", calcula 60g, NO 100g.
-            - Usa base de datos USDA/BEDCA estándar. Sé conservador con las proteínas.
-            
-            PASO 2: GENERACIÓN DE OPCIONES
-            - Contexto Obligatorio: **${this.mealContext.toUpperCase()}**.
-            - Si es DESAYUNO/SNACK: ¡OBLIGATORIO incluir opciones con PAN (Tostadas/Bocadillos/Sandwiches)!
-            - Genera 5 opciones VARIADAS (no repitas fuente proteica).
-            - Deben tener EXACTAMENTE las mismas calorías que la BASE (+/- 20 kcal).
+            ACTÚA COMO UN SOFTWARE DE INGENIERÍA NUTRICIONAL (NO COMO CHEF).
+            TU OBJETIVO: CALCULAR Y CLAVAR.
 
-            3. ${promptContext}
+            PASO 1: CÁLCULO BASE (CRÍTICO)
+            - Analiza: "${base}".
+            - Calcula macros REALES usando datos USDA por cada ingrediente.
+            - Ejemplo: 60g pan = ~30g Carb, ~160kcal (NO 500kcal).
+            - Ejemplo: 100g patata = ~17g Carb (NO 30g).
+            
+            PASO 2: INGENIERÍA INVERSA (LAS OPCIONES)
+            - Si la base tiene X kcal y Y carbohidratos, las opciones DEBEN tener X kcal y Y carbohidratos.
+            - NO TE INVENTES LOS MACROS. Calcúlalos.
+            - Si necesitas 30g de Carb y usas patata (17g/100g), ENTONCES pon ~175g de patata.
+            - Si necesitas 30g de Proteína y usas pollo (23g/100g), ENTONCES pon ~130g de pollo.
+            - **AJUSTA LOS GRAMOS PARA QUE CUADRE LA MATEMÁTICA.**
+
+            REGLAS DE CONTEXTO:
+            - Usuario eligió: **${this.mealContext.toUpperCase()}**.
+            - Si es DESAYUNO/SNACK: ¡OBLIGATORIO incluir opciones con PAN (Tostadas/Bocadillos/Sandwiches)!
+            - NO repitas la fuente principal.
 
             4. FORMATO JSON OBLIGATORIO:
             {
-               "base": { "name": "Resumen Base", "breakdown": "Desglose (Ej: Pan 60g = 160kcal...)", "kcal": 0, "p": 0, "c": 0, "f": 0 },
+               "base": { "name": "Resumen Base", "breakdown": "Ej: Pan 60g (30g HC) + Jamón 50g (10g P)...", "kcal": 0, "p": 0, "c": 0, "f": 0 },
                "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... ]
             }
             `;
@@ -527,7 +522,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.1, // MÁXIMA PRECISIÓN MATEMÁTICA
+                        temperature: 0.1, // LÓGICA PURA, CERO ALUCINACIÓN
                         response_format: { type: "json_object" }
                     })
                 });
@@ -548,14 +543,14 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS AUDITOR (${sport.toUpperCase()})</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS MATEMÁTICO REAL</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
-                        <div class="base-breakdown">${b.breakdown || "Desglose no disponible"}</div>
+                        <div class="base-breakdown">${b.breakdown || "Calculando..."}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ OPCIONES AJUSTADAS AL GRAMO ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ OPCIONES RE-CALCULADAS ⬇️</div>
                     `;
                 }
 
