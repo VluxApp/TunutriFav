@@ -333,15 +333,13 @@
             this.setFlavor('Salado');
             this.setContext('Comida/Cena');
             document.getElementById('evoDate').valueAsDate = new Date();
-            if(authService) {
-                authService.onAuthStateChanged(u => { 
-                    this.user = u; 
-                    if(u) {
-                        console.log("Usuario detectado:", u.email);
-                        this.loadData();
-                    }
-                });
-            }
+            if(authService) authService.onAuthStateChanged(u => { 
+                this.user = u; 
+                if(u) {
+                    console.log("Usuario detectado:", u.email);
+                    this.loadData();
+                }
+            });
         },
 
         enterApp: function() {
@@ -473,7 +471,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V68 (MIRROR LOGIC + FIXED PERSISTENCE) ---
+        // --- SWAP V69 (LA REGLA DE TRES MATEMÁTICA) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -481,7 +479,7 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando Base (Macros Reales)...<br>2. Aplicando ALGORITMO ESPEJO...<br>3. Clonando perfil nutricional...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando Base (Macros Reales)...<br>2. CALCULANDO EQUIVALENCIAS...<br>3. Ajustando gramos exactos...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
@@ -490,25 +488,28 @@
                 promptContext = `MODO: SALADO (Savory). INGREDIENTES PERMITIDOS: Carne, Pescado, Huevos, Queso, Arroz, Pasta, Patata, Pan con embutido. PROHIBIDO: Chocolate, Frutas dulces como plato principal, Avena dulce.`;
             }
 
-            // PROMPT MAESTRO V68: CLONADOR MATEMÁTICO (MIRROR)
+            // PROMPT MAESTRO V69: LA REGLA DE TRES
             const prompt = `
-            ACTÚA COMO UN "CLONADOR DE MACROS" MATEMÁTICO (NO COMO CHEF NI NUTRICIONISTA).
-
+            ACTÚA COMO UN SOFTWARE MATEMÁTICO (NO COMO CHEF).
+            
             OBJETIVO:
-            Recibes un input (Comida Base). Calculas sus Kcal, Proteína, Carbos, Grasa.
-            Generas 5 opciones que sean MATEMÁTICAMENTE IDÉNTICAS en macros.
+            Recibes un input. Calculas sus Kcal y Macros (EN CRUDO).
+            Generas 5 opciones que sean MATEMÁTICAMENTE EQUIVALENTES.
 
-            REGLA DE ORO "EL ESPEJO" (CRÍTICO):
-            - Si la base es 100% Carbohidrato (ej: "100g Arroz"), tus opciones DEBEN ser 100% Carbohidrato (ej: "100g Pasta"). 
-            - PROHIBIDO "arreglar" la comida. NO añadas pollo ni atún si en la base no hay proteína.
-            - Si la base es "Arroz con Pollo", tus opciones deben tener carbohidrato Y proteína.
-            - REPLICA LOS NÚMEROS, NO LA LÓGICA CULINARIA.
+            REGLA DE LA REGLA DE TRES (CRÍTICO):
+            - Si la base tiene 80g de Carbohidratos (ej: "100g Arroz"), y la opción es "Patata" (17g HC/100g):
+              CÁLCULO OBLIGATORIO: 80 / 0.17 = 470g Patata.
+              OUTPUT: "470g Patata".
+              ERROR FATAL: Si pones "100g Patata" (que son solo 17g HC), estás despedido.
+            
+            - Si la base tiene 30g de Proteína (ej: "130g Pollo"), y la opción es "Atún" (25g P/100g):
+              CÁLCULO OBLIGATORIO: 30 / 0.25 = 120g Atún.
+              OUTPUT: "120g Atún".
 
-            BASE DE DATOS Y PESOS (LEY MARCIAL):
-            - Usa BEDCA (España) y etiquetado comercial si se cita marca.
-            - PESO SIEMPRE EN CRUDO/SECO (salvo que el usuario diga "cocido").
-            - 100g Arroz = ~360 kcal, 78g HC (Valor Seco).
-            - 100g Pollo = ~106 kcal, 23g P (Valor Crudo).
+            LEYES UNIVERSALES:
+            1. PESO SIEMPRE EN CRUDO/SECO (salvo que se especifique "cocido" o marcas).
+            2. DETECTIVE DE MARCAS: Si hay marca, usa su valor comercial.
+            3. ESPEJO: Si la base es solo carbohidrato, opciones solo carbohidrato.
 
             TAREA 1: ANÁLISIS
             - Calcula macros de "${base}".
@@ -516,7 +517,7 @@
             TAREA 2: 5 OPCIONES CLONADAS
             - Genera 5 opciones distintas.
             - Contexto: ${this.mealContext.toUpperCase()} + ${promptContext}.
-            - Ajusta gramos EXACTOS para igualar macros.
+            - Ajusta gramos EXACTOS usando la Regla de Tres.
 
             FORMATO JSON OBLIGATORIO:
             {
@@ -553,13 +554,13 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS DE ESPEJO (CLONACIÓN)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS MATEMÁTICO (REGLA DE TRES)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES MATEMÁTICAS ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EQUIVALENTES ⬇️</div>
                     `;
                 }
 
@@ -656,161 +657,6 @@
                     plugins:{ legend:{ display: (this.chartMode==='body'), labels:{color:'#888', boxWidth:10} } }, 
                     scales:{ x:{ display:false }, y:{ grid:{ color:'#333' }, ticks:{ color:'#666' } } } 
                 } 
-            });
-        },
-
-        logout: function() { authService.signOut(); location.reload(); },
-        loadData: async function() {
-            if(!this.user) return;
-            this.loading(true, "Sincronizando...");
-            try {
-                const doc = await dbService.collection('users').doc(this.user.uid).get();
-                if(doc.exists) {
-                    this.data = { ...this.data, ...doc.data() };
-                    // Asegurar que el perfil existe aunque sea vacío
-                    if(!this.data.profile) this.data.profile = {};
-                    if(!this.data.menu) this.data.menu={Lunes:[],Martes:[],Miércoles:[],Jueves:[],Viernes:[],Sábado:[],Domingo:[]};
-                    if(!this.data.evolution) this.data.evolution=[];
-                    this.renderAll();
-                }
-            } catch(e) { console.error(e); }
-            this.loading(false);
-        },
-        saveData: async function() { 
-            if(this.user) {
-                try {
-                    await dbService.collection('users').doc(this.user.uid).set(this.data);
-                    console.log("Datos guardados en Firebase");
-                } catch(e) {
-                    console.error("Error guardando:", e);
-                    alert("Error al guardar en la nube: " + e.message);
-                }
-            }
-        },
-
-        renderAll: function() {
-            const p = this.data.profile || {};
-            document.getElementById('pName').value = p.name || "";
-            document.getElementById('pAge').value = p.age || "";
-            document.getElementById('pWeight').value = p.weight || "";
-            document.getElementById('pHeight').value = p.height || "";
-            document.getElementById('pSex').value = p.sex || "Hombre";
-            document.getElementById('pSport').value = p.sport || "Crossfit";
-            document.getElementById('pActivity').value = p.activity || "1.55";
-            document.getElementById('pGoal').value = p.goal || "Mantenimiento";
-            
-            const t = p.targets || {kcal:0, p:0, c:0, f:0};
-            document.getElementById('inpKcal').value = t.kcal;
-            document.getElementById('inpP').value = t.p;
-            document.getElementById('inpC').value = t.c;
-            document.getElementById('inpF').value = t.f;
-
-            this.renderMenu(); this.renderChart();
-        },
-        
-        setFlavor: function(f) {
-            this.flavor = f;
-            document.getElementById('btnSalty').classList.toggle('selected', f==='Salado');
-            document.getElementById('btnSweet').classList.toggle('selected', f==='Dulce');
-        },
-
-        openModal: function(i) {
-            this.selectedOptionIndex = i;
-            document.getElementById('modalDishName').innerText = this.tempOptions[i].name;
-            document.getElementById('addModal').classList.remove('hidden');
-        },
-        closeModal: function() { document.getElementById('addModal').classList.add('hidden'); },
-
-        confirmAddToMenu: function() {
-            try {
-                if (this.selectedOptionIndex === null || !this.tempOptions[this.selectedOptionIndex]) {
-                    alert("❌ Error: No se ha seleccionado ninguna opción.");
-                    return;
-                }
-                const opt = this.tempOptions[this.selectedOptionIndex];
-                const day = document.getElementById('modalDay').value;
-                const meal = document.getElementById('modalMeal').value;
-
-                if (!this.data.menu) this.data.menu = {};
-                if (!this.data.menu[day]) this.data.menu[day] = [];
-
-                const safeMeal = {
-                    name: opt.name || "Comida sin nombre",
-                    recipe: opt.recipe || "Sin receta",
-                    ingred: opt.ingred || "",
-                    kcal: parseFloat(opt.kcal) || 0,
-                    p: parseFloat(opt.p) || 0,
-                    c: parseFloat(opt.c) || 0,
-                    f: parseFloat(opt.f) || 0,
-                    type: meal
-                };
-
-                this.data.menu[day].push(safeMeal);
-                this.saveData();
-                this.renderMenu();
-                this.closeModal();
-                alert("✅ Plato añadido correctamente al " + day);
-
-            } catch (e) {
-                console.error("ERROR EN SWAP:", e);
-                alert("❌ Algo falló al guardar: " + e.message);
-            }
-        },
-        
-        renderMenu: function() {
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = "";
-            const days = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-            const t = this.data.profile && this.data.profile.targets ? this.data.profile.targets : {kcal:2000, p:150, c:200, f:60};
-
-            days.forEach(d => {
-                const meals = this.data.menu[d] || [];
-                let curK=0, curP=0, curC=0, curF=0;
-                meals.forEach(m => { curK+=m.kcal; curP+=m.p; curC+=m.c; curF+=m.f; });
-
-                const pctK = Math.min((curK/t.kcal)*100, 100);
-                const pctP = Math.min((curP/t.p)*100, 100);
-                const pctC = Math.min((curC/t.c)*100, 100);
-                const pctF = Math.min((curF/t.f)*100, 100);
-
-                let html = `
-                <div class="card" style="padding:0; overflow:hidden;">
-                    <div class="day-header"><span class="neon" style="font-weight:900;">${d}</span> <span style="font-size:0.7rem; color:#888;">${meals.length} comidas</span></div>
-                    
-                    <div class="day-tracker">
-                        <div class="tracker-item">
-                            <span class="tracker-val ${curK>t.kcal?'over-limit':''}">${Math.round(curK)} / ${t.kcal}</span>
-                            <div class="tracker-bar"><div class="tracker-fill ${curK>t.kcal?'bg-over':''}" style="width:${pctK}%"></div></div>
-                            <span style="font-size:0.6rem; color:#666; display:block; margin-top:2px;">KCAL</span>
-                        </div>
-                        <div class="tracker-item">
-                            <span class="tracker-val ${curP>t.p?'over-limit':''}">${Math.round(curP)} / ${t.p}</span>
-                            <div class="tracker-bar"><div class="tracker-fill ${curP>t.p?'bg-over':''}" style="width:${pctP}%; background-color:#FF4444;"></div></div>
-                            <span style="font-size:0.6rem; color:#666; display:block; margin-top:2px;">PROT</span>
-                        </div>
-                        <div class="tracker-item">
-                            <span class="tracker-val ${curC>t.c?'over-limit':''}">${Math.round(curC)} / ${t.c}</span>
-                            <div class="tracker-bar"><div class="tracker-fill ${curC>t.c?'bg-over':''}" style="width:${pctC}%; background-color:#4444FF;"></div></div>
-                            <span style="font-size:0.6rem; color:#666; display:block; margin-top:2px;">CARB</span>
-                        </div>
-                        <div class="tracker-item">
-                            <span class="tracker-val ${curF>t.f?'over-limit':''}">${Math.round(curF)} / ${t.f}</span>
-                            <div class="tracker-bar"><div class="tracker-fill ${curF>t.f?'bg-over':''}" style="width:${pctF}%; background-color:#FFFF44;"></div></div>
-                            <span style="font-size:0.6rem; color:#666; display:block; margin-top:2px;">GRASA</span>
-                        </div>
-                    </div>
-                `;
-                
-                if(meals.length===0) html+=`<div style="padding:20px; color:#444; font-size:0.8rem; text-align:center;">Día vacío. Añade desde Swap.</div>`;
-                
-                meals.forEach((m, i) => {
-                    html += `<div class="meal-item">
-                        <div style="font-weight:800; font-size:0.8rem; color:#666; margin-bottom:4px;">${m.type.toUpperCase()} <span onclick="window.app.delMeal('${d}',${i})" style="float:right; color:var(--danger); cursor:pointer;">×</span></div>
-                        <div style="font-size:0.95rem; font-weight:600;">${m.name}</div>
-                        <div class="meal-macros">${m.kcal} kcal | P:${m.p} C:${m.c} G:${m.f}</div>
-                    </div>`;
-                });
-                grid.innerHTML += html + "</div>";
             });
         },
 
