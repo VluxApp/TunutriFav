@@ -106,11 +106,10 @@
         .meal-item { padding: 12px; border-bottom: 1px solid #222; position: relative; }
         .option-card { border-left: 4px solid var(--neon); padding: 15px; background: #161616; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222; }
         
-        /* CARD BASE CON DESGLOSE */
+        /* CARD BASE LIMPIA */
         .base-card { border-left: 4px solid #888; padding: 15px; background: #0f0f0f; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .base-breakdown { font-size: 0.75rem; color: #aaa; margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; line-height: 1.5; white-space: pre-wrap; font-family: monospace; }
         
-        .meal-macros { font-size: 0.75rem; color: #888; margin-top: 6px; background: #0a0a0a; display: inline-block; padding: 4px 8px; border-radius: 6px; border: 1px solid #222; }
+        .meal-macros { font-size: 0.85rem; font-weight: 700; color: #fff; margin-top: 6px; background: #222; display: inline-block; padding: 8px 12px; border-radius: 6px; border: 1px solid #333; width: 100%; box-sizing: border-box; text-align: center; }
         details { margin-top: 10px; border-top: 1px solid #222; padding-top: 8px; }
         summary { cursor: pointer; font-size: 0.8rem; color: var(--neon); font-weight: bold; list-style: none; outline: none; }
         
@@ -465,7 +464,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V54 (INGENIERÍA INVERSA & PRECISIÓN MATEMÁTICA) ---
+        // --- SWAP V56 (BEDCA UNIVERSAL + UI LIMPIA + 5 OPCIONES) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -474,44 +473,39 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Calculando macros reales...<br>2. Aplicando ingeniería inversa...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Consultando BEDCA (España)...<br>2. Diseñando 5 opciones...</div>`;
 
+            // Lógica DULCE vs SALADO estricta
             let promptContext = "";
             if (this.flavor === "Dulce") {
-                promptContext = `MODO: DULCE/FIT. TIPO: Tortitas, Porridge, Bowl. INGREDIENTES: Avena, Whey, Claras, Fruta, Cacao.`;
+                promptContext = `MODO: DULCE (Sweet). INGREDIENTES PERMITIDOS: Avena, Fruta, Yogur, Whey, Claras, Cacao, Pan con mermelada. PROHIBIDO: Carne, Pescado, Legumbres, Verduras saladas.`;
             } else {
-                promptContext = `MODO: SALADO. TIPO: Plato principal. INGREDIENTES: Carnes, Pescados, Arroz, Patata, Huevos, Legumbres.`;
+                promptContext = `MODO: SALADO (Savory). INGREDIENTES PERMITIDOS: Carne, Pescado, Huevos, Queso, Arroz, Pasta, Patata, Pan con embutido. PROHIBIDO: Chocolate, Frutas dulces como plato principal, Avena dulce.`;
             }
 
             let levelLabel = (activityVal >= 1.725) ? "ÉLITE/PRO" : "AMATEUR";
 
-            // PROMPT MATEMÁTICO V54
+            // PROMPT V56 (BEDCA GLOBAL + 5 OPCIONES)
             const prompt = `
-            ACTÚA COMO UN SOFTWARE DE INGENIERÍA NUTRICIONAL (NO COMO CHEF).
-            TU OBJETIVO: CALCULAR Y CLAVAR.
-
-            PASO 1: CÁLCULO BASE (CRÍTICO)
-            - Analiza: "${base}".
-            - Calcula macros REALES usando datos USDA por cada ingrediente.
-            - Ejemplo: 60g pan = ~30g Carb, ~160kcal (NO 500kcal).
-            - Ejemplo: 100g patata = ~17g Carb (NO 30g).
+            ROL: NUTRICIONISTA EXPERTO EN BASE DE DATOS BEDCA (ESPAÑA).
             
-            PASO 2: INGENIERÍA INVERSA (LAS OPCIONES)
-            - Si la base tiene X kcal y Y carbohidratos, las opciones DEBEN tener X kcal y Y carbohidratos.
-            - NO TE INVENTES LOS MACROS. Calcúlalos.
-            - Si necesitas 30g de Carb y usas patata (17g/100g), ENTONCES pon ~175g de patata.
-            - Si necesitas 30g de Proteína y usas pollo (23g/100g), ENTONCES pon ~130g de pollo.
-            - **AJUSTA LOS GRAMOS PARA QUE CUADRE LA MATEMÁTICA.**
+            TAREA 1: ANÁLISIS DE LA BASE
+            - Analiza: "${base}".
+            - FUENTE DE VERDAD: Usa la base de datos BEDCA para **TODOS** los alimentos (no solo pan/jamón).
+            - Calcula Kcal, Proteína, Carbos y Grasa totales.
+            
+            TAREA 2: GENERAR 5 OPCIONES (OBLIGATORIO)
+            - REQUISITO: Genera EXACTAMENTE 5 opciones distintas. No te detengas en 3.
+            - CONTEXTO: ${this.mealContext.toUpperCase()} + ${promptContext}.
+            - REGLA DE ORO: Las 5 opciones deben tener las mismas Kcal (+/- 10%) que la base. Ajusta los gramos para cuadrar.
+            
+            TAREA 3: UI LIMPIA
+            - En el resumen, dame solo el total de macros, sin desglose de ingredientes individual.
 
-            REGLAS DE CONTEXTO:
-            - Usuario eligió: **${this.mealContext.toUpperCase()}**.
-            - Si es DESAYUNO/SNACK: ¡OBLIGATORIO incluir opciones con PAN (Tostadas/Bocadillos/Sandwiches)!
-            - NO repitas la fuente principal.
-
-            4. FORMATO JSON OBLIGATORIO:
+            FORMATO JSON OBLIGATORIO:
             {
-               "base": { "name": "Resumen Base", "breakdown": "Ej: Pan 60g (30g HC) + Jamón 50g (10g P)...", "kcal": 0, "p": 0, "c": 0, "f": 0 },
-               "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... ]
+               "base": { "name": "Tu comida original", "summary": "🎯 X kcal | P:X C:X G:X", "kcal": 0, "p": 0, "c": 0, "f": 0 },
+               "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... (5 items) ]
             }
             `;
 
@@ -522,7 +516,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.1, // LÓGICA PURA, CERO ALUCINACIÓN
+                        temperature: 0.25, // Un poco más de libertad para encontrar 5 opciones, pero manteniendo BEDCA
                         response_format: { type: "json_object" }
                     })
                 });
@@ -543,14 +537,13 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS MATEMÁTICO REAL</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS AUDITOR (BEDCA 🇪🇸)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
-                        <div class="base-breakdown">${b.breakdown || "Calculando..."}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
-                            🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}
+                            ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ OPCIONES RE-CALCULADAS ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EXACTAS ⬇️</div>
                     `;
                 }
 
