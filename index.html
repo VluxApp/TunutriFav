@@ -86,11 +86,15 @@
         .chart-btn.active { background: var(--neon); color: black; border-color: var(--neon); }
 
         /* FLAVOR & CONTEXT GRID */
-        .flavor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; margin-bottom: 10px; }
-        .context-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 5px; margin-bottom: 10px; }
+        .flavor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; margin-bottom: 15px; }
         
-        .btn-flavor { background: #222; color: #888; border: 1px solid #333; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
-        .btn-flavor.selected { background: var(--neon) !important; color: black !important; border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(204,255,0,0.3); }
+        /* ESTILOS NUEVOS PARA BOTONES DE CONTEXTO */
+        .context-label { color: var(--neon); margin-top: 15px; display: block; font-size: 0.75rem; letter-spacing: 1px; }
+        .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; margin-bottom: 15px; }
+        
+        .btn-flavor { background: #222; color: #888; border: 1px solid #333; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 45px; }
+        .btn-flavor:hover { border-color: #555; }
+        .btn-flavor.selected { background: var(--neon) !important; color: black !important; border-color: var(--neon) !important; box-shadow: 0 0 10px rgba(204,255,0,0.4); transform: scale(1.02); }
 
         .day-header { background: #1a1a1a; padding: 12px; border-radius: 10px 10px 0 0; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .day-tracker { padding: 8px; background: #111; border-bottom: 1px solid #222; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; font-size: 0.65rem; }
@@ -218,11 +222,11 @@
                 <label>1. COMIDA BASE (ORIGEN)</label>
                 <textarea id="swapInput" rows="3" placeholder="Ej: 200g Pollo, 100g Arroz..."></textarea>
                 
-                <label>2. TIPO DE PLATO (OBLIGATORIO)</label>
+                <label class="context-label">2. ELIGE EL MOMENTO</label>
                 <div class="context-grid">
-                    <button class="btn-flavor" id="ctxBreakfast" onclick="app.setContext('Desayuno')">☕ Desayuno</button>
-                    <button class="btn-flavor" id="ctxMain" onclick="app.setContext('Comida/Cena')">🍽️ Comida</button>
-                    <button class="btn-flavor" id="ctxSnack" onclick="app.setContext('Snack')">🥪 Snack</button>
+                    <button class="btn-flavor" id="ctxBreakfast" onclick="app.setContext('Desayuno')">☕<br>Desayuno</button>
+                    <button class="btn-flavor" id="ctxSnack" onclick="app.setContext('Snack')">🥪<br>Media/Snack</button>
+                    <button class="btn-flavor" id="ctxMain" onclick="app.setContext('Comida/Cena')">🍽️<br>Comida/Cena</button>
                 </div>
 
                 <label>3. PREFERENCIA</label>
@@ -460,7 +464,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V50 (CONTROL TOTAL DE USUARIO) ---
+        // --- SWAP V51 (BREAD LOVER & VISIBLE BUTTONS) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -515,7 +519,7 @@
                 sportKnowledge = "Estrategia General Equilibrada: Salud y rendimiento base.";
             }
 
-            // PROMPT MAESTRO V50 (CON CONTROL DE CONTEXTO)
+            // PROMPT MAESTRO V51 (CON PAN OBLIGATORIO Y BOTONES VISIBLES)
             const prompt = `
             Actúa como un NUTRICIONISTA DEPORTIVO para un atleta de nivel ${levelLabel}.
             
@@ -530,14 +534,17 @@
             - NO repitas la fuente principal proteica (ej: Si una es pollo, la otra que sea pescado, la otra huevo, la otra ternera/tofu).
             - NO repitas la fuente de carbohidratos (Arroz, Pasta, Patata, Pan, Avena). ¡Variedad!
 
-            3. MISIÓN:
+            3. INSTRUCCIÓN ESPECÍFICA PAN:
+            - En Desayuno, Media Mañana o Merienda, incluye SIEMPRE alguna opción con Pan (Tostadas, Bocadillo, Sandwich). Es un alimento válido y útil.
+
+            4. MISIÓN:
             - Analiza los macros de: "${base}".
             - Clava los macros (+/- 20 kcal).
             - Adapta al deporte ${sport.toUpperCase()}.
             
-            4. ${promptContext}
+            5. ${promptContext}
 
-            5. FORMATO JSON OBLIGATORIO:
+            6. FORMATO JSON OBLIGATORIO:
             {
                "base": { "name": "Resumen Base", "kcal": 0, "p": 0, "c": 0, "f": 0 },
                "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... ]
@@ -551,7 +558,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.35, // Un poco más de creatividad para la variedad
+                        temperature: 0.35, 
                         response_format: { type: "json_object" }
                     })
                 });
@@ -578,7 +585,7 @@
                             🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES VARIADAS Y EXACTAS ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES VARIADAS (CON PAN 🍞) ⬇️</div>
                     `;
                 }
 
