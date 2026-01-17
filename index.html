@@ -87,8 +87,6 @@
 
         /* FLAVOR & CONTEXT GRID */
         .flavor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; margin-bottom: 15px; }
-        
-        /* ESTILOS NUEVOS PARA BOTONES DE CONTEXTO */
         .context-label { color: var(--neon); margin-top: 15px; display: block; font-size: 0.75rem; letter-spacing: 1px; }
         .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px; margin-bottom: 15px; }
         
@@ -107,7 +105,10 @@
 
         .meal-item { padding: 12px; border-bottom: 1px solid #222; position: relative; }
         .option-card { border-left: 4px solid var(--neon); padding: 15px; background: #161616; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222; }
+        
+        /* CARD BASE CON DESGLOSE */
         .base-card { border-left: 4px solid #888; padding: 15px; background: #0f0f0f; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .base-breakdown { font-size: 0.75rem; color: #aaa; margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; line-height: 1.5; white-space: pre-wrap; font-family: monospace; }
         
         .meal-macros { font-size: 0.75rem; color: #888; margin-top: 6px; background: #0a0a0a; display: inline-block; padding: 4px 8px; border-radius: 6px; border: 1px solid #222; }
         details { margin-top: 10px; border-top: 1px solid #222; padding-top: 8px; }
@@ -464,7 +465,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V51 (BREAD LOVER & VISIBLE BUTTONS) ---
+        // --- SWAP V53 (CALCULADORA ESTRICTA + AUDITOR) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -473,7 +474,7 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Aplicando modo ${this.mealContext}...<br>2. Diseñando variedad...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Pesando ingredientes...<br>2. Calculando opciones para ${this.mealContext}...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
@@ -482,71 +483,39 @@
                 promptContext = `MODO: SALADO. TIPO: Plato principal. INGREDIENTES: Carnes, Pescados, Arroz, Patata, Huevos, Legumbres.`;
             }
 
-            // DETECTOR DE NIVEL (PRO VS AMATEUR)
-            let levelLabel = "";
-            let levelInstruction = "";
-            
-            if (activityVal >= 1.725) {
-                levelLabel = "ÉLITE/PRO (Alta Exigencia)";
-                levelInstruction = "El usuario entrena a nivel COMPETITIVO. Precisión máxima. Sugiere timing de nutrientes, rápida digestión pre-entreno y recuperación agresiva post-entreno.";
-            } else {
-                levelLabel = "AMATEUR/LIFESTYLE";
-                levelInstruction = "El usuario entrena por SALUD/HOBBY. Prioriza adherencia, recetas ricas y flexibilidad. No hace falta timing milimétrico, sino balance global.";
-            }
+            // DETECTOR DE NIVEL
+            let levelLabel = (activityVal >= 1.725) ? "ÉLITE/PRO" : "AMATEUR";
 
-            // --- INYECCIÓN DE CONOCIMIENTO (BIBLIOTECA VLUX) ---
+            // --- INYECCIÓN DE CONOCIMIENTO ---
             let sportKnowledge = "";
-            
-            if (sport === 'Hyrox') {
-                sportKnowledge = `PROTOCOLO HYROX: Competición >60min. CLAVE: Carbohidratos. Pre-carrera: Bajo en fibra, alta digestibilidad (evitar molestias GI). Intra-entreno: Si es simulación de carrera, sugiere hidratos líquidos. Carga CHO: 6-8g/kg.`;
-            } 
-            else if (sport === 'Futbol') {
-                sportKnowledge = `PROTOCOLO FÚTBOL (AEND): Intermitente alta intensidad. Día de Partido: Carga de glucógeno (1-4g/kg pre-partido). Recuperación (3 R's): Rehidratar, Reponer (Glucógeno), Reparar (Proteína). Ayudas: Cafeína/Creatina son útiles.`;
-            } 
-            else if (sport === 'Culturismo') {
-                sportKnowledge = `PROTOCOLO CULTURISMO (Helms/Amorosi): Pirámide: 1.Balance Energético > 2.Macros > 3.Micros > 4.Timing. Proteína Alta (1.8-2.5g/kg). Volumen: Superávit controlado. Definición: Déficit moderado para mantener masa magra.`;
-            }
-            else if (sport === 'Crossfit') {
-                sportKnowledge = `PROTOCOLO CROSSFIT: Alta intensidad glucolítica. Prioridad: Reponer glucógeno post-WOD (Ratio 3:1 CHO:PRO). Evitar grasas pre-entreno para vaciado gástrico rápido.`;
-            }
-            else if (sport === 'Ciclismo') {
-                sportKnowledge = `PROTOCOLO CICLISMO: Fondo y Resistencia. Pre-ruta: Carbos complejos. Post-ruta: Ratio 4:1 CHO:PRO. Hidratación: Vital SODIO y electrolitos.`;
-            }
-            else if (sport === 'Natacion') {
-                sportKnowledge = `PROTOCOLO NATACIÓN: Digestibilidad fácil (posición horizontal). Recuperación rápida entre sesiones. Hidratación constante (no se nota el sudor).`;
-            }
-            else {
-                sportKnowledge = "Estrategia General Equilibrada: Salud y rendimiento base.";
-            }
+            if (sport === 'Hyrox') sportKnowledge = `PROTOCOLO HYROX: Competición >60min. Carga CHO: 6-8g/kg.`;
+            else if (sport === 'Futbol') sportKnowledge = `PROTOCOLO FÚTBOL: Recuperación 3R. Glucógeno intermitente.`;
+            else if (sport === 'Culturismo') sportKnowledge = `PROTOCOLO CULTURISMO: Proteína Alta (2g/kg). Saciedad.`;
+            else if (sport === 'Crossfit') sportKnowledge = `PROTOCOLO CROSSFIT: Alta intensidad. Carb intra-entreno.`;
+            else if (sport === 'Ciclismo') sportKnowledge = `PROTOCOLO CICLISMO: Fondo. Ratio 4:1. Sodio.`;
+            else sportKnowledge = "Estrategia General.";
 
-            // PROMPT MAESTRO V51 (CON PAN OBLIGATORIO Y BOTONES VISIBLES)
+            // PROMPT AUDITOR ESTRICTO V53
             const prompt = `
-            Actúa como un NUTRICIONISTA DEPORTIVO para un atleta de nivel ${levelLabel}.
+            ACTÚA COMO UNA CALCULADORA NUTRICIONAL ESTRICTA Y CIENTÍFICA (NO COMO CHEF).
             
-            1. RESTRICCIÓN DE CONTEXTO OBLIGATORIA:
-            - EL USUARIO HA SELECCIONADO: **${this.mealContext.toUpperCase()}**.
-            - SI ES DESAYUNO: Genera SOLO opciones típicas de desayuno (huevos, tostadas, avena, tortitas, yogur). PROHIBIDO arroz con pollo, pasta, legumbres o pescados pesados.
-            - SI ES COMIDA/CENA: Genera platos principales consistentes.
-            - SI ES SNACK: Genera opciones ligeras, rápidas y portátiles.
-
-            2. REGLA DE VARIEDAD ABSOLUTA:
-            - Genera 5 opciones que sean RADICALMENTE DISTINTAS entre sí.
-            - NO repitas la fuente principal proteica (ej: Si una es pollo, la otra que sea pescado, la otra huevo, la otra ternera/tofu).
-            - NO repitas la fuente de carbohidratos (Arroz, Pasta, Patata, Pan, Avena). ¡Variedad!
-
-            3. INSTRUCCIÓN ESPECÍFICA PAN:
-            - En Desayuno, Media Mañana o Merienda, incluye SIEMPRE alguna opción con Pan (Tostadas, Bocadillo, Sandwich). Es un alimento válido y útil.
-
-            4. MISIÓN:
-            - Analiza los macros de: "${base}".
-            - Clava los macros (+/- 20 kcal).
-            - Adapta al deporte ${sport.toUpperCase()}.
+            PASO 1: ANÁLISIS MATEMÁTICO PURO
+            - Analiza: "${base}".
+            - REGLA DE ORO: Si el usuario especifica GRAMOS, ÚSALOS RIGUROSAMENTE. No redondees a "raciones". 
+            - Ejemplo: Si dice "60g pan", calcula 60g, NO 100g.
+            - Usa base de datos USDA/BEDCA estándar. Sé conservador con las proteínas.
             
-            5. ${promptContext}
+            PASO 2: GENERACIÓN DE OPCIONES
+            - Contexto Obligatorio: **${this.mealContext.toUpperCase()}**.
+            - Si es DESAYUNO/SNACK: ¡OBLIGATORIO incluir opciones con PAN (Tostadas/Bocadillos/Sandwiches)!
+            - Genera 5 opciones VARIADAS (no repitas fuente proteica).
+            - Deben tener EXACTAMENTE las mismas calorías que la BASE (+/- 20 kcal).
 
-            6. FORMATO JSON OBLIGATORIO:
+            3. ${promptContext}
+
+            4. FORMATO JSON OBLIGATORIO:
             {
-               "base": { "name": "Resumen Base", "kcal": 0, "p": 0, "c": 0, "f": 0 },
+               "base": { "name": "Resumen Base", "breakdown": "Desglose (Ej: Pan 60g = 160kcal...)", "kcal": 0, "p": 0, "c": 0, "f": 0 },
                "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... ]
             }
             `;
@@ -558,7 +527,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.35, 
+                        temperature: 0.1, // MÁXIMA PRECISIÓN MATEMÁTICA
                         response_format: { type: "json_object" }
                     })
                 });
@@ -579,13 +548,14 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">OBJETIVO (${sport.toUpperCase()} - ${this.mealContext.toUpperCase()})</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS AUDITOR (${sport.toUpperCase()})</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
+                        <div class="base-breakdown">${b.breakdown || "Desglose no disponible"}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES VARIADAS (CON PAN 🍞) ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ OPCIONES AJUSTADAS AL GRAMO ⬇️</div>
                     `;
                 }
 
