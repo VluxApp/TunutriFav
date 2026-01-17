@@ -465,7 +465,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V61 (EQUIVALENCIA ISO-MACRO FORZADA) ---
+        // --- SWAP V65 (DETECTOR DE ESTADO INTELIGENTE) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -474,8 +474,9 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando Base (BEDCA/Marcas)...<br>2. Aplicando ALGORITMO ISO-MACRO...<br>3. Ajustando gramos...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando estado (Crudo/Cocido)...<br>2. Diseñando 5 opciones...</div>`;
 
+            // Lógica DULCE vs SALADO estricta
             let promptContext = "";
             if (this.flavor === "Dulce") {
                 promptContext = `MODO: DULCE (Sweet). INGREDIENTES PERMITIDOS: Avena, Fruta, Yogur, Whey, Claras, Cacao, Pan con mermelada. PROHIBIDO: Carne, Pescado, Legumbres, Verduras saladas.`;
@@ -485,29 +486,32 @@
 
             let levelLabel = (activityVal >= 1.725) ? "ÉLITE/PRO" : "AMATEUR";
 
-            // PROMPT MAESTRO V61 (ISO-MACRO)
+            // PROMPT V65 (STATE DETECTOR)
             const prompt = `
-            ROL: ALGORITMO NUTRICIONAL DE ALTA PRECISIÓN.
+            ROL: NUTRICIONISTA EXPERTO Y AUDITOR (BEDCA + DETECTOR DE ESTADO).
             
-            1. REGLA SUPREMA: PESOS EN CRUDO Y EQUIVALENCIAS REALES.
-               - Si el usuario dice "60g Pan" (~30g HC) y tú ofreces "Patata", DEBES calcular cuánta patata equivale a 30g HC.
-               - Patata cruda = ~17% HC. -> 30 / 0.17 = 176g Patata.
-               - JAMÁS ofrezcas "50g Patata" para sustituir "60g Pan". Eso es un error grave de cálculo.
-               - Arroz/Pasta: Usa ~70-75% HC (crudo).
-               - Pan: Usa ~50% HC.
-               - Patata: Usa ~17% HC.
+            1. DETECCIÓN DE ESTADO (CRÍTICO):
+               - REGLA GENERAL (DEFAULT): Si el usuario NO especifica el estado, ASUME SIEMPRE CRUDO/SECO.
+                 * "100g Arroz" -> 360 kcal (Crudo).
+                 * "100g Garbanzos" -> 350 kcal (Secos).
+                 * "100g Pollo" -> 106 kcal (Crudo).
+               
+               - EXCEPCIÓN (KEYWORDS): Si el usuario escribe "cocido", "hervido", "de bote", "en conserva", "lata", "plancha", "asado"... ENTONCES usa el valor del alimento YA COCINADO.
+                 * "100g Arroz cocido" -> 130 kcal.
+                 * "100g Garbanzos de bote" -> 90 kcal.
             
             2. DETECTIVE DE MARCAS:
-               - Si hay marca (Hacendado, Danone...), usa sus macros comerciales.
-               - Si no, usa BEDCA (España).
+               - Si hay marca (Hacendado, Danone...), usa macros comerciales.
             
             TAREA 1: ANÁLISIS DE LA BASE
-            - Calcula Kcal y Macros de "${base}".
+            - Analiza: "${base}".
+            - Aplica la lógica de detección de estado RIGUROSAMENTE.
             
             TAREA 2: GENERAR 5 OPCIONES (OBLIGATORIO)
-            - REQUISITO: Genera EXACTAMENTE 5 opciones distintas.
+            - Genera 5 opciones distintas.
             - CONTEXTO: ${this.mealContext.toUpperCase()} + ${promptContext}.
-            - REGLA DE ORO: Las opciones deben ser ISO-MACROS. Ajusta la cantidad (gramos) del ingrediente principal para que coincidan los Carbohidratos y Proteínas con la base.
+            - REGLA ISO-CALÓRICA: Las 5 opciones deben tener las mismas Kcal (+/- 10%) que la base interpretada.
+            - IMPORTANTE: En las recetas que generes, especifica "(crudo)" o "(cocido)" si hay ambigüedad.
             
             TAREA 3: UI LIMPIA
             - Resumen simple.
@@ -526,7 +530,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.1, // Lógica pura para forzar la equivalencia matemática
+                        temperature: 0.2, 
                         response_format: { type: "json_object" }
                     })
                 });
@@ -547,13 +551,13 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS ISO-MACRO (BEDCA/MARCAS)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS AUDITOR (ESTADO DETECTADO)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EQUIVALENTES (PESO CRUDO) ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EQUIVALENTES ⬇️</div>
                     `;
                 }
 
@@ -578,79 +582,6 @@
                 console.error(e);
                 resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}</p>`; 
             }
-        },
-
-        setFlavor: function(f) {
-            this.flavor = f;
-            document.getElementById('btnSalty').classList.toggle('selected', f==='Salado');
-            document.getElementById('btnSweet').classList.toggle('selected', f==='Dulce');
-        },
-
-        setContext: function(c) {
-            this.mealContext = c;
-            document.getElementById('ctxBreakfast').classList.toggle('selected', c==='Desayuno');
-            document.getElementById('ctxMain').classList.toggle('selected', c==='Comida/Cena');
-            document.getElementById('ctxSnack').classList.toggle('selected', c==='Snack');
-        },
-
-        // --- EVO & CHARTS ---
-        switchChart: function(mode) {
-            this.chartMode = mode;
-            document.getElementById('btnChartWeight').classList.toggle('active', mode==='weight');
-            document.getElementById('btnChartBody').classList.toggle('active', mode==='body');
-            this.renderChart();
-        },
-
-        addEvo: function() {
-            const d = document.getElementById('evoDate').value;
-            const w = document.getElementById('evoWeight').value;
-            const chest = document.getElementById('evoChest').value || 0;
-            const waist = document.getElementById('evoWaist').value || 0;
-            const hip = document.getElementById('evoHip').value || 0;
-            const thigh = document.getElementById('evoThigh').value || 0;
-            const arm = document.getElementById('evoArm').value || 0;
-
-            if(d && w) { 
-                this.data.evolution.push({ date:d, weight:w, chest, waist, hip, thigh, arm }); 
-                this.data.evolution.sort((a,b)=>new Date(a.date)-new Date(b.date)); 
-                this.saveData(); 
-                this.renderChart();
-                alert("✅ Registro guardado");
-            } else {
-                alert("Fecha y peso son obligatorios");
-            }
-        },
-
-        renderChart: function() {
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            if(window.chart) window.chart.destroy();
-            const labels = this.data.evolution.map(e=>e.date);
-            let datasets = [];
-
-            if(this.chartMode === 'weight') {
-                datasets.push({
-                    label: 'Peso (Kg)',
-                    data: this.data.evolution.map(e=>e.weight),
-                    borderColor: '#CCFF00', backgroundColor: 'rgba(204,255,0,0.1)', fill: true, tension: 0.3
-                });
-            } else {
-                datasets = [
-                    { label:'Pecho', data:this.data.evolution.map(e=>e.chest), borderColor:'#FF4444', borderDash:[5,5], tension:0.3 },
-                    { label:'Cintura', data:this.data.evolution.map(e=>e.waist), borderColor:'#4444FF', tension:0.3 },
-                    { label:'Cadera', data:this.data.evolution.map(e=>e.hip), borderColor:'#FFFF44', tension:0.3 },
-                    { label:'Muslo', data:this.data.evolution.map(e=>e.thigh), borderColor:'#00CCFF', tension:0.3 },
-                    { label:'Brazo', data:this.data.evolution.map(e=>e.arm), borderColor:'#FF00FF', tension:0.3 }
-                ];
-            }
-
-            window.chart = new Chart(ctx, { 
-                type:'line', 
-                data: { labels, datasets }, 
-                options: { 
-                    plugins:{ legend:{ display: (this.chartMode==='body'), labels:{color:'#888', boxWidth:10} } }, 
-                    scales:{ x:{ display:false }, y:{ grid:{ color:'#333' }, ticks:{ color:'#666' } } } 
-                } 
-            });
         },
 
         delMeal: function(d, i) { if(confirm("¿Borrar?")) { this.data.menu[d].splice(i, 1); this.saveData(); this.renderMenu(); } },
