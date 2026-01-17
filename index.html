@@ -471,7 +471,7 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V69 (LA REGLA DE TRES MATEMÁTICA) ---
+        // --- SWAP V70 (HARDCODED REFERENCE TABLE) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
@@ -479,45 +479,48 @@
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando Base (Macros Reales)...<br>2. CALCULANDO EQUIVALENCIAS...<br>3. Ajustando gramos exactos...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Consultando TABLA DE REFERENCIA...<br>2. Forzando valores en crudo...<br>3. Generando clon exacto...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
-                promptContext = `MODO: DULCE (Sweet). INGREDIENTES PERMITIDOS: Avena, Fruta, Yogur, Whey, Claras, Cacao, Pan con mermelada. PROHIBIDO: Carne, Pescado, Legumbres, Verduras saladas.`;
+                promptContext = `MODO: DULCE (Sweet). INGREDIENTES: Avena, Fruta, Yogur, Whey, Cacao.`;
             } else {
-                promptContext = `MODO: SALADO (Savory). INGREDIENTES PERMITIDOS: Carne, Pescado, Huevos, Queso, Arroz, Pasta, Patata, Pan con embutido. PROHIBIDO: Chocolate, Frutas dulces como plato principal, Avena dulce.`;
+                promptContext = `MODO: SALADO (Savory). INGREDIENTES: Carne, Pescado, Arroz, Pasta, Patata.`;
             }
 
-            // PROMPT MAESTRO V69: LA REGLA DE TRES
+            // PROMPT MAESTRO V70: INYECCIÓN DE DATOS
             const prompt = `
-            ACTÚA COMO UN SOFTWARE MATEMÁTICO (NO COMO CHEF).
+            ACTÚA COMO UN SISTEMA EXPERTO CERRADO.
             
-            OBJETIVO:
-            Recibes un input. Calculas sus Kcal y Macros (EN CRUDO).
-            Generas 5 opciones que sean MATEMÁTICAMENTE EQUIVALENTES.
-
-            REGLA DE LA REGLA DE TRES (CRÍTICO):
-            - Si la base tiene 80g de Carbohidratos (ej: "100g Arroz"), y la opción es "Patata" (17g HC/100g):
-              CÁLCULO OBLIGATORIO: 80 / 0.17 = 470g Patata.
-              OUTPUT: "470g Patata".
-              ERROR FATAL: Si pones "100g Patata" (que son solo 17g HC), estás despedido.
+            NO BUSQUES EN INTERNET. USA ESTA TABLA DE VALORES OBLIGATORIA (PESO EN CRUDO/SECO):
             
-            - Si la base tiene 30g de Proteína (ej: "130g Pollo"), y la opción es "Atún" (25g P/100g):
-              CÁLCULO OBLIGATORIO: 30 / 0.25 = 120g Atún.
-              OUTPUT: "120g Atún".
-
-            LEYES UNIVERSALES:
-            1. PESO SIEMPRE EN CRUDO/SECO (salvo que se especifique "cocido" o marcas).
-            2. DETECTIVE DE MARCAS: Si hay marca, usa su valor comercial.
-            3. ESPEJO: Si la base es solo carbohidrato, opciones solo carbohidrato.
-
-            TAREA 1: ANÁLISIS
-            - Calcula macros de "${base}".
-
-            TAREA 2: 5 OPCIONES CLONADAS
-            - Genera 5 opciones distintas.
-            - Contexto: ${this.mealContext.toUpperCase()} + ${promptContext}.
-            - Ajusta gramos EXACTOS usando la Regla de Tres.
+            === TABLA DE REFERENCIA (PER 100g) ===
+            [CARBOHIDRATOS]
+            - Arroz (Seco): 360 kcal | 78g HC | 7g P | 1g G
+            - Pasta (Seca): 360 kcal | 75g HC | 12g P | 1.5g G
+            - Avena (Seca): 380 kcal | 60g HC | 14g P | 7g G
+            - Patata (Cruda): 80 kcal | 17g HC | 2g P | 0g G
+            - Pan Blanco: 260 kcal | 50g HC | 8g P | 2g G
+            
+            [PROTEÍNAS]
+            - Pollo/Pavo (Crudo): 110 kcal | 0g HC | 23g P | 2g G
+            - Ternera Magra (Cruda): 130 kcal | 0g HC | 21g P | 5g G
+            - Pescado Blanco (Crudo): 80 kcal | 0g HC | 18g P | 1g G
+            - Huevos (x1, 55g): 80 kcal | 0.5g HC | 7g P | 6g G
+            - Atún Lata (al natural, 100g escurrido): 100 kcal | 0g HC | 24g P | 1g G
+            
+            [GRASAS]
+            - Aceite Oliva: 900 kcal | 0g HC | 0g P | 100g G
+            - Aguacate: 160 kcal | 9g HC | 2g P | 15g G
+            
+            INSTRUCCIONES CRÍTICAS:
+            1. Si el usuario escribe "Arroz", ASUME SIEMPRE ARROZ SECO (360 kcal). NUNCA uses valores de arroz cocido (130 kcal).
+            2. REGLA DEL ESPEJO: Si la base tiene 100g Arroz (78g HC), y la opción es Patata (17g HC), DEBES calcular: 78 / 0.17 = 460g Patata. ¡NO pongas 100g!
+            3. Si la base es "Arroz + Pollo", tus opciones deben tener "Fuente de Carbohidrato + Fuente de Proteína".
+            
+            TAREA:
+            1. Analiza "${base}" usando la TABLA DE REFERENCIA.
+            2. Genera 5 opciones que CLAVEN los macros resultantes.
 
             FORMATO JSON OBLIGATORIO:
             {
@@ -554,13 +557,13 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS MATEMÁTICO (REGLA DE TRES)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (RAW DATA)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EQUIVALENTES ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 CLONES EXACTOS ⬇️</div>
                     `;
                 }
 
