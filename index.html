@@ -319,7 +319,7 @@
         dbService = firebase.firestore();
     } catch(e) { console.error(e); }
 
-    // --- APP CORE (GLOBAL FIXED + ROBUST JSON PARSING) ---
+    // --- APP CORE (V75 - MATEMÁTICO PURO) ---
     const app = {
         user: null,
         data: {
@@ -471,38 +471,40 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V74 (JSON CLEANER & RAW LOGIC) ---
+        // --- SWAP V75 (PROMPT LÓGICO + EXTRACTOR BLINDADO) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando (Modo SECO)...<br>2. Calculando Arroz (~360kcal)...<br>3. Generando...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando Input...<br>2. Calculando (x3.6 Grano, x1.1 Carne)...<br>3. Generando opciones...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
-                promptContext = `MODO: DULCE (Sweet). INGREDIENTES: Avena, Fruta, Yogur, Whey, Cacao.`;
+                promptContext = `MODO: DULCE. Ingredientes: Avena, Fruta, Yogur, Whey.`;
             } else {
-                promptContext = `MODO: SALADO (Savory). INGREDIENTES: Carne, Pescado, Arroz, Pasta, Patata.`;
+                promptContext = `MODO: SALADO. Ingredientes: Arroz, Pasta, Carne, Pescado.`;
             }
 
-            // PROMPT MAESTRO V74: ROBUSTO
+            // PROMPT V75: LÓGICA DIRECTA, SIN TABLAS
             const prompt = `
-            ACTÚA COMO CALCULADORA DE NUTRICIÓN DEPORTIVA.
+            Eres un generador JSON de nutrición deportiva.
             
-            REGLAS (NO LAS ROMPAS):
-            1. USA SIEMPRE PESO EN CRUDO/SECO por defecto.
-               - 100g Arroz/Pasta = ~360 kcal (NO 130).
-               - 100g Pollo = ~110 kcal.
-            2. REGLA DEL ESPEJO: Las 5 opciones deben tener EXACTAMENTE las mismas Kcal y Macros que la base calculada en crudo.
-            3. OUTPUT: Solo JSON. No escribas texto antes ni después.
+            TU LÓGICA DE CÁLCULO (OBLIGATORIA):
+            1. Asume TODO en CRUDO/SECO por defecto.
+            2. Si ves ARROZ, PASTA, AVENA: Multiplica los gramos por 3.6 para sacar kcal. (Ej: 100g = 360kcal).
+            3. Si ves POLLO, TERNERA: Multiplica los gramos por 1.1 para sacar kcal. (Ej: 100g = 110kcal).
+            4. Si ves HUEVO: 80kcal por unidad.
+            
+            TAREA:
+            1. Calcula los macros de: "${base}" usando la lógica de arriba.
+            2. Genera 5 opciones alternativas con los MISMOS macros totales (+/- 10%).
+            3. NO inventes texto. Devuelve SOLO el JSON.
 
-            INPUT USUARIO: "${base}"
-
-            FORMATO JSON OBLIGATORIO:
+            FORMATO JSON:
             {
-               "base": { "name": "Tu comida original", "summary": "🎯 X kcal | P:X C:X G:X", "kcal": 0, "p": 0, "c": 0, "f": 0 },
+               "base": { "name": "${base}", "summary": "Calculado en seco", "kcal": 0, "p": 0, "c": 0, "f": 0 },
                "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... ]
             }
             `;
@@ -514,7 +516,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.1, 
+                        temperature: 0.1, // Mínima creatividad, máxima lógica
                         response_format: { type: "json_object" }
                     })
                 });
@@ -523,19 +525,22 @@
                 const json = await response.json();
                 let content = json.choices[0].message.content;
                 
-                // --- FILTRO DE LIMPIEZA JSON V74 ---
-                // Busca el primer '{' y el último '}' para ignorar texto basura
-                const jsonStart = content.indexOf('{');
-                const jsonEnd = content.lastIndexOf('}');
-                if (jsonStart !== -1 && jsonEnd !== -1) {
-                    content = content.substring(jsonStart, jsonEnd + 1);
+                // --- EXTRACTOR JSON BLINDADO (v75) ---
+                // Busca el primer '{' y el último '}'
+                const firstBrace = content.indexOf('{');
+                const lastBrace = content.lastIndexOf('}');
+                
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    content = content.substring(firstBrace, lastBrace + 1);
+                } else {
+                    throw new Error("La IA no devolvió un JSON válido.");
                 }
-                // -----------------------------------
+                // -------------------------------------
                 
                 let parsedData;
                 try {
                     parsedData = JSON.parse(content);
-                } catch(e) { throw new Error("La IA no generó un formato válido."); }
+                } catch(e) { throw new Error("Error de sintaxis en el JSON de la IA."); }
 
                 resDiv.innerHTML = "";
 
@@ -543,10 +548,10 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (MODO SECO)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (LÓGICA SECA)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
-                            ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
+                            ${b.summary || "Info"} | 🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}
                         </div>
                     </div>
                     <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES EQUIVALENTES ⬇️</div>
@@ -556,10 +561,10 @@
                 let optionsList = [];
                 if (Array.isArray(parsedData)) optionsList = parsedData;
                 else if (parsedData.recipes) optionsList = parsedData.recipes;
-                else if (parsedData.options) optionsList = parsedData.options;
                 
+                if (!optionsList || optionsList.length === 0) throw new Error("No se generaron recetas.");
+
                 this.tempOptions = optionsList;
-                if (!this.tempOptions || this.tempOptions.length === 0) throw new Error("No se generaron recetas.");
 
                 this.tempOptions.forEach((opt, i) => {
                     resDiv.innerHTML += `<div class="option-card">
@@ -571,8 +576,8 @@
                     </div>`;
                 });
             } catch(e) { 
-                console.error(e); 
-                resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}. Prueba de nuevo.</p>`; 
+                console.error("ERROR DETALLADO:", e);
+                resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}</p>`; 
             }
         },
 
