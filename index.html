@@ -471,14 +471,14 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V70 (HARDCODED TABLE INJECTION) ---
+        // --- SWAP V71 (OPTIMIZED RAW LOGIC) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Forzando TABLA MAESTRA...<br>2. Calculando Arroz (360kcal) y Pollo (110kcal)...<br>3. Generando clones...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Aplicando LEY DEL CRUDO (ARROZ = 360kcal)...<br>2. Calculando macros reales...<br>3. Generando clones...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
@@ -487,33 +487,28 @@
                 promptContext = `MODO: SALADO (Savory). INGREDIENTES: Carne, Pescado, Arroz, Pasta, Patata.`;
             }
 
-            // PROMPT V70: INYECCIÓN DE DATOS FORZOSA
+            // PROMPT MAESTRO V71: LIGERO Y ESTRICTO
             const prompt = `
-            ACTÚA COMO CALCULADORA ESTRICTA. NO USES TUS DATOS INTERNOS. USA ESTA TABLA:
-
-            === TABLA OBLIGATORIA (Valores por 100g) ===
-            [CARBOS - SIEMPRE SECOS/CRUDOS]
-            - Arroz: 360 kcal | 78g HC | 7g P
-            - Pasta: 360 kcal | 75g HC | 12g P
-            - Avena: 380 kcal | 60g HC | 14g P
-            - Patata: 80 kcal | 17g HC | 2g P (Cruda)
+            ACTÚA COMO UN SOFTWARE MATEMÁTICO DE NUTRICIÓN.
             
-            [PROTEINAS - SIEMPRE CRUDAS]
-            - Pollo/Pavo: 110 kcal | 0g HC | 23g P
-            - Ternera: 130 kcal | 0g HC | 21g P
-            - Pescado Blanco: 80 kcal | 0g HC | 18g P
-            - Huevo (unidad 55g): 80 kcal | 0g HC | 7g P
-            - Atún Lata: 100 kcal | 0g HC | 24g P
-
-            INSTRUCCIONES:
-            1. Analiza "${base}". Si pone "100g Arroz", USA EL VALOR DE LA TABLA (360kcal), NO uses 130kcal.
-            2. Si pone "60g Pollo", USA EL VALOR DE LA TABLA (110kcal/100g -> ~66kcal), NO uses 100kcal.
-            3. Suma TOTALES REALES (deportivos).
+            REGLA SUPREMA (CRÍTICO):
+            - Si el usuario escribe "Arroz", "Pasta", "Avena", "Lentejas", "Pollo", "Ternera"... ASUME SIEMPRE VALORES EN CRUDO/SECO.
+            - NUNCA uses valores de "cocido" a menos que se especifique.
             
-            GENERACIÓN:
-            - Crea 5 opciones con los MISMOS macros totales calculados con la tabla.
-            - Contexto: ${this.mealContext.toUpperCase()} + ${promptContext}.
-            - Regla de Tres: Si necesitas 80g HC y usas Patata (17g/100g), pon 470g Patata.
+            TABLA DE REFERENCIA MENTAL (OBLIGATORIA):
+            - Arroz/Pasta (Seco): ~360 kcal/100g (NO 130).
+            - Pollo (Crudo): ~110 kcal/100g.
+            - Patata (Cruda): ~80 kcal/100g.
+            
+            EJEMPLO DE CÁLCULO:
+            - Input: "100g Arroz + 60g Pollo".
+            - Cálculo Correcto: (3.6 * 100) + (1.1 * 60) = 360 + 66 = 426 kcal.
+            - ERROR FATAL: Si calculas 266 kcal (valores cocidos), FALLARÁS.
+
+            TAREA:
+            1. Analiza "${base}" usando la REGLA SUPREMA. Dame los macros reales (altos).
+            2. Genera 5 opciones que tengan LOS MISMOS MACROS (Regla del Espejo).
+            3. Si necesitas 80g de Carbos y usas Patata (17g/100g), pon 470g Patata. ¡Haz la matemática!
 
             FORMATO JSON OBLIGATORIO:
             {
@@ -550,7 +545,7 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (DATA INYECTADA)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (RAW DATA)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
