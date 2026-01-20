@@ -319,7 +319,7 @@
         dbService = firebase.firestore();
     } catch(e) { console.error(e); }
 
-    // --- APP CORE (GLOBAL FIXED) ---
+    // --- APP CORE (GLOBAL FIXED + ROBUST JSON PARSING) ---
     const app = {
         user: null,
         data: {
@@ -471,14 +471,14 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V72 (COMPRESSED RAW LOGIC) ---
+        // --- SWAP V74 (JSON CLEANER & RAW LOGIC) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Aplicando REGLA MAESTRA (Seco/Crudo)...<br>2. Calculando...<br>3. Generando clones...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Analizando (Modo SECO)...<br>2. Calculando Arroz (~360kcal)...<br>3. Generando...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
@@ -487,25 +487,18 @@
                 promptContext = `MODO: SALADO (Savory). INGREDIENTES: Carne, Pescado, Arroz, Pasta, Patata.`;
             }
 
-            // PROMPT MAESTRO V72: COMPRIMIDO
+            // PROMPT MAESTRO V74: ROBUSTO
             const prompt = `
-            ACTÚA COMO CALCULADORA NUTRICIONAL DEPORTIVA.
+            ACTÚA COMO CALCULADORA DE NUTRICIÓN DEPORTIVA.
             
-            REGLA DE ORO (CRÍTICO): 
-            Calcula SIEMPRE el peso en SECO/CRUDO por defecto.
-            - 100g Arroz/Pasta = 360 kcal (NO 130).
-            - 100g Pollo/Carne = 110 kcal (NO cocinado).
-            - 100g Patata = 80 kcal (Cruda).
-            
-            EJEMPLO MAESTRO:
-            Input: "100g Arroz + 60g Pollo"
-            Cálculo: (3.6 * 100) + (1.1 * 60) = 360 + 66 = 426 kcal.
-            
-            INSTRUCCIONES:
-            1. Analiza "${base}". Calcula los macros reales (altos, en seco).
-            2. Genera 5 opciones con los MISMOS macros totales.
-            3. Si la base es "Arroz" (HC), la opción debe ser "Pasta" (HC). No mezcles macros si no existen en la base.
-            4. Contexto: ${this.mealContext.toUpperCase()} + ${promptContext}.
+            REGLAS (NO LAS ROMPAS):
+            1. USA SIEMPRE PESO EN CRUDO/SECO por defecto.
+               - 100g Arroz/Pasta = ~360 kcal (NO 130).
+               - 100g Pollo = ~110 kcal.
+            2. REGLA DEL ESPEJO: Las 5 opciones deben tener EXACTAMENTE las mismas Kcal y Macros que la base calculada en crudo.
+            3. OUTPUT: Solo JSON. No escribas texto antes ni después.
+
+            INPUT USUARIO: "${base}"
 
             FORMATO JSON OBLIGATORIO:
             {
@@ -521,7 +514,7 @@
                     body: JSON.stringify({
                         messages: [{ role: "user", content: prompt }],
                         model: "llama-3.3-70b-versatile",
-                        temperature: 0.2, 
+                        temperature: 0.1, 
                         response_format: { type: "json_object" }
                     })
                 });
@@ -529,12 +522,20 @@
                 if(!response.ok) throw new Error("Error Groq API");
                 const json = await response.json();
                 let content = json.choices[0].message.content;
-                if(content.includes("```json")) content = content.split("```json")[1].split("```")[0];
+                
+                // --- FILTRO DE LIMPIEZA JSON V74 ---
+                // Busca el primer '{' y el último '}' para ignorar texto basura
+                const jsonStart = content.indexOf('{');
+                const jsonEnd = content.lastIndexOf('}');
+                if (jsonStart !== -1 && jsonEnd !== -1) {
+                    content = content.substring(jsonStart, jsonEnd + 1);
+                }
+                // -----------------------------------
                 
                 let parsedData;
                 try {
                     parsedData = JSON.parse(content);
-                } catch(e) { throw new Error("Datos ilegibles."); }
+                } catch(e) { throw new Error("La IA no generó un formato válido."); }
 
                 resDiv.innerHTML = "";
 
@@ -542,7 +543,7 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (LÓGICA SECA)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (MODO SECO)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
@@ -570,7 +571,7 @@
                     </div>`;
                 });
             } catch(e) { 
-                console.error(e);
+                console.error(e); 
                 resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}. Prueba de nuevo.</p>`; 
             }
         },
