@@ -471,15 +471,14 @@
             this.saveData(); this.renderAll(); alert("✅ Perfil Guardado");
         },
 
-        // --- SWAP V70 (HARDCODED REFERENCE TABLE) ---
+        // --- SWAP V70 (HARDCODED TABLE INJECTION) ---
         runSwap: async function() {
             const base = document.getElementById('swapInput').value;
             const resDiv = document.getElementById('swapResults');
-            const sport = this.data.profile.sport || "General";
             
             if(!base) return alert("Escribe una comida base.");
 
-            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Consultando TABLA DE REFERENCIA...<br>2. Forzando valores en crudo...<br>3. Generando clon exacto...</div>`;
+            resDiv.innerHTML = `<div style="text-align:center; padding:30px; color:#888;"><span class="spinner"></span><br>1. Forzando TABLA MAESTRA...<br>2. Calculando Arroz (360kcal) y Pollo (110kcal)...<br>3. Generando clones...</div>`;
 
             let promptContext = "";
             if (this.flavor === "Dulce") {
@@ -488,44 +487,38 @@
                 promptContext = `MODO: SALADO (Savory). INGREDIENTES: Carne, Pescado, Arroz, Pasta, Patata.`;
             }
 
-            // PROMPT MAESTRO V70: INYECCIÓN DE DATOS
+            // PROMPT V70: INYECCIÓN DE DATOS FORZOSA
             const prompt = `
-            ACTÚA COMO UN SISTEMA EXPERTO CERRADO.
+            ACTÚA COMO CALCULADORA ESTRICTA. NO USES TUS DATOS INTERNOS. USA ESTA TABLA:
+
+            === TABLA OBLIGATORIA (Valores por 100g) ===
+            [CARBOS - SIEMPRE SECOS/CRUDOS]
+            - Arroz: 360 kcal | 78g HC | 7g P
+            - Pasta: 360 kcal | 75g HC | 12g P
+            - Avena: 380 kcal | 60g HC | 14g P
+            - Patata: 80 kcal | 17g HC | 2g P (Cruda)
             
-            NO BUSQUES EN INTERNET. USA ESTA TABLA DE VALORES OBLIGATORIA (PESO EN CRUDO/SECO):
+            [PROTEINAS - SIEMPRE CRUDAS]
+            - Pollo/Pavo: 110 kcal | 0g HC | 23g P
+            - Ternera: 130 kcal | 0g HC | 21g P
+            - Pescado Blanco: 80 kcal | 0g HC | 18g P
+            - Huevo (unidad 55g): 80 kcal | 0g HC | 7g P
+            - Atún Lata: 100 kcal | 0g HC | 24g P
+
+            INSTRUCCIONES:
+            1. Analiza "${base}". Si pone "100g Arroz", USA EL VALOR DE LA TABLA (360kcal), NO uses 130kcal.
+            2. Si pone "60g Pollo", USA EL VALOR DE LA TABLA (110kcal/100g -> ~66kcal), NO uses 100kcal.
+            3. Suma TOTALES REALES (deportivos).
             
-            === TABLA DE REFERENCIA (PER 100g) ===
-            [CARBOHIDRATOS]
-            - Arroz (Seco): 360 kcal | 78g HC | 7g P | 1g G
-            - Pasta (Seca): 360 kcal | 75g HC | 12g P | 1.5g G
-            - Avena (Seca): 380 kcal | 60g HC | 14g P | 7g G
-            - Patata (Cruda): 80 kcal | 17g HC | 2g P | 0g G
-            - Pan Blanco: 260 kcal | 50g HC | 8g P | 2g G
-            
-            [PROTEÍNAS]
-            - Pollo/Pavo (Crudo): 110 kcal | 0g HC | 23g P | 2g G
-            - Ternera Magra (Cruda): 130 kcal | 0g HC | 21g P | 5g G
-            - Pescado Blanco (Crudo): 80 kcal | 0g HC | 18g P | 1g G
-            - Huevos (x1, 55g): 80 kcal | 0.5g HC | 7g P | 6g G
-            - Atún Lata (al natural, 100g escurrido): 100 kcal | 0g HC | 24g P | 1g G
-            
-            [GRASAS]
-            - Aceite Oliva: 900 kcal | 0g HC | 0g P | 100g G
-            - Aguacate: 160 kcal | 9g HC | 2g P | 15g G
-            
-            INSTRUCCIONES CRÍTICAS:
-            1. Si el usuario escribe "Arroz", ASUME SIEMPRE ARROZ SECO (360 kcal). NUNCA uses valores de arroz cocido (130 kcal).
-            2. REGLA DEL ESPEJO: Si la base tiene 100g Arroz (78g HC), y la opción es Patata (17g HC), DEBES calcular: 78 / 0.17 = 460g Patata. ¡NO pongas 100g!
-            3. Si la base es "Arroz + Pollo", tus opciones deben tener "Fuente de Carbohidrato + Fuente de Proteína".
-            
-            TAREA:
-            1. Analiza "${base}" usando la TABLA DE REFERENCIA.
-            2. Genera 5 opciones que CLAVEN los macros resultantes.
+            GENERACIÓN:
+            - Crea 5 opciones con los MISMOS macros totales calculados con la tabla.
+            - Contexto: ${this.mealContext.toUpperCase()} + ${promptContext}.
+            - Regla de Tres: Si necesitas 80g HC y usas Patata (17g/100g), pon 470g Patata.
 
             FORMATO JSON OBLIGATORIO:
             {
                "base": { "name": "Tu comida original", "summary": "🎯 X kcal | P:X C:X G:X", "kcal": 0, "p": 0, "c": 0, "f": 0 },
-               "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... (5 items) ]
+               "recipes": [ {"name":"...","ingred":"...","recipe":"...","p":0,"c":0,"f":0,"kcal":0}, ... ]
             }
             `;
 
@@ -557,13 +550,13 @@
                     const b = parsedData.base;
                     resDiv.innerHTML += `
                     <div class="base-card">
-                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (RAW DATA)</strong>
+                        <strong style="color:#888; font-size:0.8rem; text-transform:uppercase;">ANÁLISIS VLUX (DATA INYECTADA)</strong>
                         <div style="font-size:1.1rem; font-weight:900; color:#fff; margin-top:5px;">${b.name || base}</div>
                         <div class="meal-macros" style="margin-top:10px; background:#222; border-color:#444; color:#fff;">
                             ${b.summary || `🎯 ${b.kcal} kcal | P:${b.p} C:${b.c} G:${b.f}`}
                         </div>
                     </div>
-                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 CLONES EXACTOS ⬇️</div>
+                    <div style="text-align:center; color:#666; font-size:0.7rem; margin-bottom:15px; letter-spacing:1px;">⬇️ 5 OPCIONES MATEMÁTICAS ⬇️</div>
                     `;
                 }
 
@@ -586,7 +579,7 @@
                 });
             } catch(e) { 
                 console.error(e);
-                resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}</p>`; 
+                resDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">Error: ${e.message}. Intenta simplificar el texto.</p>`; 
             }
         },
 
